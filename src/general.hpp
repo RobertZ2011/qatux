@@ -47,7 +47,7 @@ namespace Qatux {
 
         for(int i = 0; i < N; i++) {
             for(int j = 0; j < M; j++) {
-                result[2 * i + j] = n[i] * m[j];
+                result[M * i + j] = n[i] * m[j];
             }
         }
 
@@ -62,7 +62,7 @@ namespace Qatux {
 
             constexpr int firstBit = N >> (NQUBITS - 1) ; // N >> (NQUBITS - 1) gets the MSB of the number
             constexpr int remaining = ~(1 << (NQUBITS - 1)) & N; //gets the LSBs of the number
-            return basis<remaining, NQUBITS - 1, T>::value() % basis<firstBit, 1, T>::value();
+            return basis<firstBit, 1, T>::value() % basis<remaining, NQUBITS - 1, T>::value();
         }
     };
 
