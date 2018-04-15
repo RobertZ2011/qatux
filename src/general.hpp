@@ -1,60 +1,45 @@
 #ifndef QATUX_GENERAL
 #define QATUX_GENERAL
 
+#include <Eigen/KroneckerProduct>
+
 namespace Qatux {
-    template<int N, typename T>
-    using Vector = Eigen::Matrix<std::complex<T>, N, 1>;
+    template<typename T = float>
+    using Complex = std::complex<T>;
+
+    template<int N, typename T = float>
+    using Vector = Eigen::Matrix<Complex<T>, N, 1>;
 
     inline constexpr int pow2(int exp) {
         return (exp == 0) ? 1 : 2 * pow2(exp - 1);
     }
 
-    template<typename T>
+    //return |0>
+    template<typename T = float>
     Vector<2, T> zero(void) {
         Vector<2, T> result;
-        result[0] = std::complex<T>(1.0, 0.0);
-        result[1] = std::complex<T>(0.0, 0.0);
+        result[0] = 1.0;
+        result[1] = 0.0;
         return result;
     }
 
-    template<typename T>
+    //return |1>
+    template<typename T = float>
     Vector<2, T> one(void) {
         Vector<2, T> result;
-        result[0] = std::complex<T>(0.0, 0.0);
-        result[1] = std::complex<T>(1.0, 0.0);
+        result[0] = 0.0;
+        result[1] = 1.0;
         return result;
     }
-
-    template<typename T>
-    Vector<2, T> supPlus(void) {
-        T norm = 1.0 / sqrt(2.0);
-        Vector<2, T> result = norm * (zero<T>() + one<T>());
-        return result;
-    }
-
-    template<typename T>
-    Vector<2, T> supMinus(void) {
-        T norm = 1.0 / sqrt(2.0);
-        Vector<2, T> result = norm * (zero<T>() + one<T>());
-        return result;
-    }
-
 
     //tensor product
     template<int N, int M, typename T>
-    Vector<N * M, T> operator%(const Vector<N, T>& n, const Vector<M, T>& m) {
-        Vector<N * M, T> result;
-
-        for(int i = 0; i < N; i++) {
-            for(int j = 0; j < M; j++) {
-                result[M * i + j] = n[i] * m[j];
-            }
-        }
-
-        return result;
+    inline Vector<N * M, T> operator%(const Vector<N, T>& v, const Vector<M, T>& w) {
+        return kroneckerProduct(v, w);
     }
 
-    template<int N, int NQUBITS, typename T>
+    //returns |N> for a space of size NQUBITS
+    template<int N, int NQUBITS, typename T = float>
     struct basis {
         static Vector<pow2(NQUBITS), T> value(void) {
             static_assert(N >= 0, "Attempt to create negative qubit basis");

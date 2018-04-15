@@ -9,6 +9,7 @@
 #include <iomanip>
 
 #include "general.hpp"
+#include "single_gate.hpp"
 
 namespace Qatux {
     template<int N, typename T = float>
@@ -32,8 +33,19 @@ namespace Qatux {
 
         template<int Q>
         void checkQubit(void) {
-            static_assert(Q < 0, "Negative qubit index");
-            static_assert(Q >= N, "Qubit index exceeds state size");
+            static_assert(Q >= 0, "Negative qubit index");
+            static_assert(Q <= N, "Qubit index exceeds state size");
+        }
+
+        template<int Q>
+        void hadamard(void) {
+            this->checkQubit<Q>();
+
+            Eigen::Matrix<Complex<T>, 2, 2> op;
+            op << 1.0,  1.0, 
+                  1.0, -1.0;
+            op *= 1.0 / sqrt(2.0);
+            this->state = SingleGateOp<Q, N, T>::calculate(state, op);
         }
 
         T totalProbability(void) {
