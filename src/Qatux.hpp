@@ -10,6 +10,7 @@
 
 #include "general.hpp"
 #include "SingleGate.hpp"
+#include "DoubleGate.hpp"
 
 namespace Qatux {
     template<int N, typename T = float>
@@ -37,11 +38,18 @@ namespace Qatux {
             static_assert(Q <= N, "Qubit index exceeds state size");
         }
 
+        template<int Q1, int Q2>
+        void checkQubit2(void) {
+            static_assert(Q1 >= 0 && Q2 >= 0, "Negative qubit index");
+            static_assert(Q1 <= N && Q2 <= N, "Qubit index exceeds state size");
+            static_assert(Q1 != Q2, "Qubits not distinct");
+        }
+
         template<int Q>
         void hadamard(void) {
             this->checkQubit<Q>();
 
-            Eigen::Matrix<Complex<T>, 2, 2> op;
+            Matrix<2, 2, T> op;
             op << 1.0,  1.0,
                   1.0, -1.0;
             op *= 1.0 / sqrt(2.0);
@@ -52,7 +60,7 @@ namespace Qatux {
         void notGate(void) {
             this->checkQubit<Q>();
 
-            Eigen::Matrix<Complex<T>, 2, 2> op;
+            Matrix<2, 2, T> op;
             op << 0.0, 1.0,
                   1.0, 0.0;
             this->state = SingleGate<Q, N, T>::calculate(state, op);
@@ -67,6 +75,25 @@ namespace Qatux {
                   0.0, std::exp(Complex<T>(0.0, phi));
 
             this->state = SingleGate<Q, N, T>::calculate(state, op);
+        }
+
+        template<int Q1, int Q2>
+        void controlled(const Matrix<2, 2, T>& base) {
+            Matrix<4, 4, T> op = Matrix<4, 4, T>::Identity();
+            op.bottomRightCorner<2, 2>() = base;
+
+            this->state = DoubleGate<Q1, Q2, N, T>::calculate(state, op);
+        }
+
+        template<int Q1, int Q2>
+        void cnot(void) {
+            this->checkQubit2<Q1, Q2>();
+
+            Matrix<2, 2, T> op;
+            op << 0.0, 1.0,
+                  1.0, 0.0;
+
+            this->controlled<Q1, Q2>(op);
         }
 
         void showOutcomes(void) {
