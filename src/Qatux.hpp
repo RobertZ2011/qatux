@@ -42,9 +42,30 @@ namespace Qatux {
             this->checkQubit<Q>();
 
             Eigen::Matrix<Complex<T>, 2, 2> op;
-            op << 1.0,  1.0, 
+            op << 1.0,  1.0,
                   1.0, -1.0;
             op *= 1.0 / sqrt(2.0);
+            this->state = SingleGateOp<Q, N, T>::calculate(state, op);
+        }
+
+        /*template<int Q>
+        void not(void) {
+            this->checkQubit<Q>();
+
+            Eigen::Matrix<Complex<T>, 2, 2> op;
+            op << 0.0, 1.0,
+                  1.0, 0.0;
+            this->state = SingleGateOp<Q, N, T>::calculate(state, op);
+        }*/
+
+        template<int Q>
+        void phaseShift(T phi) {
+            this->checkQubit<Q>();
+
+            Eigen::Matrix<Complex<T>, 2, 2> op;
+            op << 1.0, 0.0,
+                  0.0, std::exp(Complex<T>(0.0, phi));
+
             this->state = SingleGateOp<Q, N, T>::calculate(state, op);
         }
 

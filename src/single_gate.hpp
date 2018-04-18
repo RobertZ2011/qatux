@@ -80,10 +80,10 @@ namespace Qatux {
     template<int N, int Q, int NQUBITS, typename T>
     struct SingleGateOpAdder {
         static Vector<pow2(NQUBITS), T> add(const SingleGateCoeffVector<NQUBITS, T>& coeff, const Vector<2, T>& Gzero, const Vector<2, T>& Gone) {
-            constexpr int upperBasis = N >> (Q + 1);     //gets the bits above bit Q
+            constexpr int upperBasis = N >> Q;     //gets the bits above bit Q
             constexpr int upperSize = NQUBITS - (Q + 1); //number of bits in upperBasis
-            constexpr int lowerBasis = ~(1 << Q) & N; //gets the bits below bit Q
-            constexpr int lowerSize = Q;              //number of bits in lowerBasis
+            constexpr int lowerBasis = ~(0x3 << (Q - 1)) & N; //gets the bits below bit Q
+            constexpr int lowerSize = Q - 1;              //number of bits in lowerBasis
             auto selectedQubit = (N & 0x1) ? Gone : Gzero;
             return basis<upperBasis, upperSize>::value () % selectedQubit % basis<lowerBasis, lowerSize>::value() % coeff[N] + SingleGateOpAdder<N - 1, Q, NQUBITS, T>::add(coeff, Gzero, Gone);
         }
@@ -94,7 +94,7 @@ namespace Qatux {
     struct SingleGateOpAdder<0, Q, NQUBITS, T> {
         static Vector<pow2(NQUBITS), T> add(const SingleGateCoeffVector<NQUBITS, T>& coeff, const Vector<2, T>& Gzero, const Vector<2, T>& Gone) {
             constexpr int upperSize = NQUBITS - (Q + 1); //number of bits in upperBasis
-            constexpr int lowerSize = Q;                 //number of bits in lowerBasis
+            constexpr int lowerSize = Q - 1;                 //number of bits in lowerBasis
             return basis<0, upperSize>::value () % Gzero % basis<0, lowerSize>::value() % coeff[0];
         }
     };

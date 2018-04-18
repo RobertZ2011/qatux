@@ -4,10 +4,10 @@
 using namespace Qatux;
 
 int main(int argc, char **argv) {
-    State<2> state(basis<0, 2>::value());
+    State<4> state(basis<15, 4>::value());
 
-    state.showOutcomes();
-    state.hadamard<1>();
-    state.showOutcomes();
+    for(int i = 0; i < 100000; i ++) {
+        state.hadamard<2>();
+    }
     return 0;
 }
