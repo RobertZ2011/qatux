@@ -9,7 +9,7 @@
 #include <iomanip>
 
 #include "general.hpp"
-#include "single_gate.hpp"
+#include "SingleGate.hpp"
 
 namespace Qatux {
     template<int N, typename T = float>
@@ -45,18 +45,18 @@ namespace Qatux {
             op << 1.0,  1.0,
                   1.0, -1.0;
             op *= 1.0 / sqrt(2.0);
-            this->state = SingleGateOp<Q, N, T>::calculate(state, op);
+            this->state = SingleGate<Q, N, T>::calculate(state, op);
         }
 
-        /*template<int Q>
-        void not(void) {
+        template<int Q>
+        void notGate(void) {
             this->checkQubit<Q>();
 
             Eigen::Matrix<Complex<T>, 2, 2> op;
             op << 0.0, 1.0,
                   1.0, 0.0;
-            this->state = SingleGateOp<Q, N, T>::calculate(state, op);
-        }*/
+            this->state = SingleGate<Q, N, T>::calculate(state, op);
+        }
 
         template<int Q>
         void phaseShift(T phi) {
@@ -66,11 +66,7 @@ namespace Qatux {
             op << 1.0, 0.0,
                   0.0, std::exp(Complex<T>(0.0, phi));
 
-            this->state = SingleGateOp<Q, N, T>::calculate(state, op);
-        }
-
-        T totalProbability(void) {
-            return this->state.dot(this->state.conjugate()).real();
+            this->state = SingleGate<Q, N, T>::calculate(state, op);
         }
 
         void showOutcomes(void) {
