@@ -4,11 +4,17 @@
 using namespace Qatux;
 
 int main(int argc, char **argv) {
-    State<2> state(Basis<2, 2>::value());
+    State<float> state(4);
+
+    state = basis(0, 4);
 
     state.showOutcomes();
-    state.hadamard<0>();
-    state.cnot<0, 1>();
+    for(int i = 0; i < 10000; i++) {
+        state.hadamard(0);
+        state.hadamard(1);
+        state.hadamard(2);
+        state.hadamard(3);
+    }
     state.showOutcomes();
     return 0;
 }
