@@ -6,11 +6,11 @@
 #include <bitset>
 #include <cmath>
 #include <random>
-#include <iostream>
-#include <iomanip>
+#include <assert.h>
 
 #include "general.hpp"
-#include "SingleGate.hpp"
+#include "single_gate.hpp"
+#include "double_gate.hpp"
 
 namespace Qatux {
     template<typename T = float>
@@ -23,9 +23,8 @@ namespace Qatux {
         std::uniform_real_distribution<T> distribution;
 
     public:
-        State(int NQUBITS) {
-            this->state = Vector<T>(pow2(NQUBITS));
-            this->NQUBITS = NQUBITS;
+        State(int NQUBITS, const Vector<T>& state) : state(state), NQUBITS(NQUBITS){
+            assert(state.rows() == pow2(NQUBITS));
             this->generator = std::mt19937_64(this->rd());
             this->distribution = std::uniform_real_distribution<T>(0.0, 1.0);
         }
@@ -45,90 +44,98 @@ namespace Qatux {
             op.insert(1, 0) = 1.0;
             op.insert(1, 1) = -1.0;
 
-            /*op << 1.0,  1.0,
-                  1.0, -1.0;*/
             op *= 1.0 / sqrt(2.0);
             this->state = singleGate(Q, this->NQUBITS, this->state, op);
         }
 
-        /*void notGate(int Q) {
+        void notGate(int Q) {
             Matrix<T> op(2, 2);
-            op << 0.0, 1.0,
-                  1.0, 0.0;
+
+            op.insert(0, 0) = 0.0;
+            op.insert(0, 1) = 1.0;
+            op.insert(1, 0) = 1.0;
+            op.insert(1, 1) = 0.0;
+
             this->state = singleGate(Q, this->NQUBITS, this->state, op);
-        }*
+        }
 
-        /*template<int Q>
         void phaseShift(T phi) {
-            this->checkQubit<Q>();
+            Matrix<T> op(2, 2);
 
-            Eigen::Matrix<Complex<T>, 2, 2> op;
-            op << 1.0, 0.0,
-                  0.0, std::exp(Complex<T>(0.0, phi));
+            op.insert(0, 0) = 1.0;
+            op.insert(0, 1) = 0.0;
+            op.insert(1, 0) = 0.0;
+            op.insert(1, 1) = std::exp(Complex<T>(0.0, phi));
 
-            this->state = SingleGate<Q, N, T>::calculate(state, op);
+            this->state = singleGate(state, op);
         }
 
-        template<int Q1, int Q2>
-        void controlled(const Matrix<2, 2, T>& base) {
-            Matrix<4, 4, T> op = Matrix<4, 4, T>::Identity();
-            op.bottomRightCorner<2, 2>() = base;
+        void controlled(int Q1, int Q2, const Matrix<T>& base) {
+            Matrix<T> op(4, 4);
 
-            this->state = DoubleGate<Q1, Q2, N, T>::calculate(state, op);
+            op.reserve(6);
+            op.setIdentity();
+
+            op.insert(2, 3) = base.coeff(0, 1);
+            op.insert(3, 2) = base.coeff(1, 0);
+
+            op.coeffRef(2, 2) = base.coeff(0, 0);
+            op.coeffRef(3, 3) = base.coeff(1, 1);
+
+            this->state = doubleGate<T>(Q1, Q2, this->NQUBITS, state, op);
         }
 
-        template<int Q1, int Q2>
-        void cnot(void) {
-            this->checkQubit2<Q1, Q2>();
+        void cnot(int Q1, int Q2) {
+            Matrix<T> op(2, 2);
 
-            Matrix<2, 2, T> op;
-            op << 0.0, 1.0,
-                  1.0, 0.0;
+            op.reserve(2);
 
-            this->controlled<Q1, Q2>(op);
-        }*/
+            op.insert(0, 0) = 0.0;
+            op.insert(0, 1) = 1.0;
+            op.insert(1, 0) = 1.0;
+            op.insert(1, 1) = 0.0;
 
-        void showOutcomes(void) {
-            Vector<T> probabilities= this->state.array() * this->state.conjugate().array();
+            this->controlled(Q1, Q2, op);
+        }
 
-            std::cout << "State ";
-
-            /*if(N > 6) {
-                std::cout << std::string(" ", N - 6);
-            }*/
-
-            std::cout << "| Percentage" << std::endl;
-
-            for(int i = 0; i < this->state.rows(); i++) {
-                std::bitset<3> state = i;
-                auto flags = std::cout.flags();
-
-                /*if(N < 6) {
-                    std::cout << std::string(" ", 6 - N + 1);
-                }*/
-
-                std::cout << std::setfill('0') << std::setw(8) << state;
-                std::cout.flags(flags);
-                std::cout << "| " << std::fixed << std::setprecision(2) << 100 * probabilities[i].real() << std::endl;
-                std::cout.flags(flags);
+        void swap(int Q1, int Q2) {
+            if(this->NQUBITS == 2) {
+                this->state = swap2<T>() * this->state;
+            }
+            else
+            if(Q2 == Q1 + 1 || Q1 == Q2 + 1) {
+                this->state = doubleGateConsec(Q1, Q2, NQUBITS, swap2<T>());
+            }
+            else {
+                this->state = swapN<T>(Q1, Q2, this->NQUBITS) * this->state;
             }
         }
 
-        /*std::bitset<N> measure(void) {
+        void showOutcomes(void) {
+            Vector<T> probabilities  = this->state.array() * this->state.conjugate().array();
+
+            printf("State | Percentage\n");
+            for(int i = 0; i < this->state.rows(); i++) {
+                printBin(i, this->NQUBITS);
+                printf(" | %.2f\n", (float) probabilities[i].real() * 100.0);
+            }
+        }
+
+        std::bitset<32> measure(void) {
             T rand = this->distribution(this->generator);
             T start = 0;
             Vector<T> probabilities= this->state.array() * this->state.conjugate().array();
             int i;
 
-            for(i = 0; i < pow2(N); i++) {
+            for(i = 0; i < pow2(this->NQUBITS); i++) {
                 start += probabilities[i].real();
                 if(start >= rand) {
                     break;
                 }
             }
 
-            return std::bitset<N>(i);
-        }*/
+            return std::bitset<32>(i);
+        }
     };
 }
 #endif
