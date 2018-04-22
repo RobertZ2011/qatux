@@ -28,6 +28,6 @@ namespace Qatux {
         return mat * state;
     }
 
-    template Vector<float> singleGate<float>(int Q, int NQUBITS, const Vector<T>& state, const Matrix<T>& op);
-    template Vector<double> singleGate<double>(int Q, int NQUBITS, const Vector<T>& state, const Matrix<T>& op);
+    template Vector<float> singleGate<float>(int Q, int NQUBITS, const Vector<float>& state, const Matrix<float>& op);
+    template Vector<double> singleGate<double>(int Q, int NQUBITS, const Vector<double>& state, const Matrix<double>& op);
 }

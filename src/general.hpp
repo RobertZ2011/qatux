@@ -1,7 +1,13 @@
 #ifndef QATUX_GENERAL
 #define QATUX_GENERAL
 
+#include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include <Eigen/KroneckerProduct>
+#include <bitset>
+#include <cmath>
+#include <random>
+#include <assert.h>
 
 namespace Qatux {
     template<typename T = float>

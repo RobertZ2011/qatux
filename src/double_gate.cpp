@@ -48,8 +48,8 @@ namespace Qatux {
         }
     }
 
-    template Matrix<float> doubleGateConsec<float>(int Q1, int Q2, int NQUBITS, const Matrix<T>& op);
-    template Matrix<double> doubleGateConsec<double>(int Q1, int Q2, int NQUBITS, const Matrix<T>& op);
+    template Matrix<float> doubleGateConsec<float>(int Q1, int Q2, int NQUBITS, const Matrix<float>& op);
+    template Matrix<double> doubleGateConsec<double>(int Q1, int Q2, int NQUBITS, const Matrix<double>& op);
 
     //generate a matrix that swaps Q1 and Q2
     template<typename T>
@@ -98,7 +98,7 @@ namespace Qatux {
         return mat;
     }
 
-    template Matrix<float> swapN<double>(int Q1, int Q2, int NQUBITS);
+    template Matrix<float> swapN<float>(int Q1, int Q2, int NQUBITS);
     template Matrix<double> swapN<double>(int Q1, int Q2, int NQUBITS);
 
     template<typename T>
@@ -119,6 +119,6 @@ namespace Qatux {
         }
     }
 
-    template Vector<float> doubleGate<float>(int Q1, int Q2, int NQUBITS, const Vector<T>& state, const Matrix<T>& op);
-    template Vector<double> doubleGate<double>(int Q1, int Q2, int NQUBITS, const Vector<T>& state, const Matrix<T>& op)
+    template Vector<float> doubleGate<float>(int Q1, int Q2, int NQUBITS, const Vector<float>& state, const Matrix<float>& op);
+    template Vector<double> doubleGate<double>(int Q1, int Q2, int NQUBITS, const Vector<double>& state, const Matrix<double>& op);
 }
